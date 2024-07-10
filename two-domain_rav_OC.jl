@@ -196,7 +196,7 @@ function main(n_x,n_y)
   # dc(uf,duf,vf) = ∫( vf⊙(dconv∘(duf,∇(duf),uf,∇(uf))) )dΩ_f
   # af((uf,pf),(vf,qf)) = ∫( 1/Re*∇(uf)⊙∇(vf) - pf*(∇⋅vf) - qf*(∇⋅uf) )dΩ_f +
   af((uf,pf),(vf,qf)) = ∫( 1/Re*∇(uf)⊙∇(vf) - pf*(∇⋅vf) - ∇(qf)⋅uf )dΩ_f +
-                        #∫( pf.⁺*(vf.⁺⋅n_Γ_fp.⁺) -  1/Re*(∇(uf.⁺)⋅n_Γ_fp.⁺)⋅vf.⁺ )dΓ_fp +
+                        # ∫( pf.⁺*(vf.⁺⋅n_Γ_fp.⁺) -  1/Re*(∇(uf.⁺)⋅n_Γ_fp.⁺)⋅vf.⁺ )dΓ_fp +
                         ∫( qf*(uf⋅n_Γ_f_out))dΓ_f_out
 
   #porous
@@ -216,8 +216,15 @@ function main(n_x,n_y)
   I = TensorValue(1.0,0.0,0.0,1.0)
   σf(u,p) = 1/Re*∇(u) - p*I
   σp(p) = -p*I
-  apf((uf,pf,up,pp),(vf,qf,vp,qp)) = ∫( 0.5*(((uf.⁺+up.⁻)⋅n_Γfp.⁺)*(qf.⁺ - qp.⁻)) )dΓ_fp +
-  ∫( 0.5*(((σf(uf.⁺,pf.⁺)⋅n_Γfp.⁺)+(σp(pp.⁻)⋅n_Γfp.⁺))⋅(vf.⁺ - vp.⁻)) )dΓ_fp #+
+  apf((uf,pf,up,pp),(vf,qf,vp,qp)) =
+  ∫( 0.5*((uf.⁺⋅n_Γfp.⁺)+(up.⁻⋅n_Γfp.⁺))*qf.⁺ )dΓ_fp -
+  ∫( 0.5*((uf.⁺⋅n_Γfp.⁺)+(up.⁻⋅n_Γfp.⁺))*qp.⁻ )dΓ_fp +
+  # ∫( 0.5*(((uf.⁺+up.⁻)⋅n_Γfp.⁺)*(qf.⁺ - qp.⁻)) )dΓ_fp +
+  ∫( (0.5*(σf(uf.⁺,pf.⁺)⋅n_Γ_fp.⁺ + (σp(pp.⁻)⋅n_Γ_fp.⁺)))⋅vf.⁺ )dΓ_fp -
+  # ∫( (σp(pp.⁻)⋅n_Γ_fp.⁻)⋅vp.⁻ )dΓ_fp
+  ∫( (0.5*(σf(uf.⁺,pf.⁺)⋅n_Γ_fp.⁺ + (σp(pp.⁻)⋅n_Γ_fp.⁺)))⋅vp.⁻ )dΓ_fp #+
+  # ∫( Gr_c/Re*(up.⁻-(up.⁻⋅n_Γfp.⁻)*n_Γfp.⁻)⋅(vp.⁻-(vp.⁻⋅n_Γfp.⁻)*n_Γfp.⁻) )dΓ_fp
+  # ∫( 0.5*(((σf(uf.⁺,pf.⁺)⋅n_Γfp.⁺)+(σp(pp.⁻)⋅n_Γfp.⁺))⋅(vf.⁺ - vp.⁻)) )dΓ_fp #+
   # ∫( 0.5*(((σf(uf.⁺,pf.⁺)⋅n_Γfp.⁺)-(σp(pp.⁻)⋅n_Γfp.⁺))⋅(vf.⁺ + vp.⁻)) )dΓ_fp
 
   l((vf,qf)) = ∫(0*qf)dΩ_f
